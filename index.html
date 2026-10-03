@@ -8,13 +8,16 @@
   <meta name="theme-color" content="#05030a" />
   <meta name="robots" content="index, follow" />
 
+  <link rel="canonical" href="https://www.themycelialnetwork.xyz/" />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.themycelialnetwork.xyz/" />
   <meta property="og:title" content="MYCELIAL — The Mycelial Network" />
   <meta property="og:description" content="Beneath everything, a network. At the gate, the Gnomes. $MYCELIAL on Solana." />
   <meta property="og:image" content="" />
   <meta property="og:site_name" content="Mycelial Network" />
 
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@mycelialxyz" />
   <meta name="twitter:title" content="MYCELIAL — The Mycelial Network" />
   <meta name="twitter:description" content="Beneath everything, a network. At the gate, the Gnomes. $MYCELIAL on Solana." />
   <meta name="twitter:image" content="" />
@@ -188,6 +191,8 @@ em { color: var(--cyan); font-style: normal; }
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  background: transparent;
+  opacity: 1;
 }
 
 .scanlines {
@@ -1231,7 +1236,6 @@ body.tripping .ring { animation-duration: 4s; }
         </div>
         <div class="socials">
           <a data-link="x" target="_blank" rel="noopener noreferrer" aria-label="X / Twitter">𝕏</a>
-          <a data-link="telegram" target="_blank" rel="noopener noreferrer" aria-label="Telegram">TG</a>
           <a data-link="chart" target="_blank" rel="noopener noreferrer" aria-label="DexScreener">DEX</a>
         </div>
       </div>
@@ -1250,10 +1254,9 @@ body.tripping .ring { animation-duration: 4s; }
    ========================================================== */
 const CONFIG = {
   ticker: "$MYCELIAL",
-  contract: "", // paste the Solana mint address here at launch
+  contract: "BZ6yGfbM2KggZjmqh2NmfhqoEvgVErnrDZ2MzJ9pump",
   links: {
-    x: "https://x.com/",
-    telegram: "https://t.me/",
+    x: "https://x.com/mycelialxyz",
   },
   tokenomics: {
     supply: "1,000,000,000",
@@ -1318,7 +1321,6 @@ function applyConfig() {
     buy: ca ? `https://jup.ag/swap/SOL-${ca}` : "",
     chart: ca ? `https://dexscreener.com/solana/${ca}` : "",
     x: CONFIG.links.x,
-    telegram: CONFIG.links.telegram,
   };
   $$("[data-link]").forEach((a) => {
     const href = hrefs[a.dataset.link];
@@ -1365,12 +1367,12 @@ const Net = (() => {
   const strokeCache = new Map();
   const mouse = { x: -9999, y: -9999, active: false };
 
-  const SPORE_CAP = 28;
-  const PATH_CAP = 80;
+  const SPORE_CAP = 48;
+  const PATH_CAP = 140;
 
   const limits = () => ({
-    max: reducedMotion ? 28 : state.tripping ? 140 : 90,
-    min: reducedMotion ? 10 : state.tripping ? 55 : 28,
+    max: reducedMotion ? 40 : state.tripping ? 200 : 150,
+    min: reducedMotion ? 16 : state.tripping ? 80 : 55,
   });
 
   function strokeStyle(hue, alpha) {
@@ -1428,9 +1430,9 @@ const Net = (() => {
     if (hyphae.length >= limits().max) return;
     hyphae.push({
       x, y, a, gen, hue, age: 0,
-      life: rand(90, 260) / (gen * 0.5 + 1),
-      speed: rand(0.9, 1.9) * (state.tripping ? 1.5 : 1),
-      w: Math.max(0.35, 1.9 - gen * 0.35),
+      life: rand(140, 380) / (gen * 0.45 + 1),
+      speed: rand(0.85, 1.75) * (state.tripping ? 1.5 : 1),
+      w: Math.max(0.55, 2.4 - gen * 0.35),
       pts: [[x, y]],
     });
   }
@@ -1442,12 +1444,14 @@ const Net = (() => {
 
   function seed() {
     const { min } = limits();
-    let guard = 6;
+    let guard = 12;
     while (hyphae.length < min && guard--) {
-      if (paths.length && Math.random() < 0.6) {
+      if (paths.length && Math.random() < 0.55) {
         const p = pick(paths);
         const [x, y] = pick(p);
         spawn(x, y, rand(0, Math.PI * 2), 1);
+      } else if (Math.random() < 0.35) {
+        spawn(rand(W * 0.1, W * 0.9), rand(H * 0.15, H * 0.85), rand(0, Math.PI * 2), 1);
       } else {
         const edge = (Math.random() * 4) | 0;
         if (edge === 0) spawn(rand(0, W), H + 5, rand(-2.4, -0.7));
@@ -1484,8 +1488,8 @@ const Net = (() => {
 
       const nx = h.x + Math.cos(h.a) * h.speed;
       const ny = h.y + Math.sin(h.a) * h.speed;
-      const fade = Math.min(1, h.life / 40);
-      tctx.strokeStyle = strokeStyle(h.hue, 0.5 * fade + 0.1);
+      const fade = Math.min(1, h.life / 50);
+      tctx.strokeStyle = strokeStyle(h.hue, 0.72 * fade + 0.22);
       tctx.lineWidth = h.w;
       tctx.beginPath();
       tctx.moveTo(h.x, h.y);
@@ -1493,16 +1497,16 @@ const Net = (() => {
       tctx.stroke();
 
       h.x = nx; h.y = ny; h.life--; h.age++;
-      if (h.age % 6 === 0) h.pts.push([nx, ny]);
+      if (h.age % 5 === 0) h.pts.push([nx, ny]);
 
-      if (h.gen < 4 && hyphae.length < lim.max && Math.random() < 0.012) {
+      if (h.gen < 4 && hyphae.length < lim.max && Math.random() < 0.022) {
         spawn(nx, ny, h.a + (Math.random() < 0.5 ? -1 : 1) * rand(0.4, 1), h.gen + 1, h.hue);
-        if (frame % 3 === 0) node(nx, ny, h.hue, 1.6);
+        if (frame % 2 === 0) node(nx, ny, h.hue, 2.1);
       }
 
       const out = nx < -40 || ny < -40 || nx > W + 40 || ny > H + 40;
       if (h.life <= 0 || out) {
-        if (!out && frame % 2 === 0) node(h.x, h.y, h.hue, 2.6);
+        if (!out && frame % 2 === 0) node(h.x, h.y, h.hue, 3.2);
         if (h.pts.length > 5) {
           paths.push(h.pts);
           if (paths.length > PATH_CAP) paths.shift();
@@ -1511,14 +1515,14 @@ const Net = (() => {
       }
     }
 
-    if (frame % 2 === 0) {
+    if (frame % 3 === 0) {
       tctx.globalCompositeOperation = "destination-out";
-      tctx.fillStyle = `rgba(0,0,0,${state.tripping ? 0.045 : 0.035})`;
+      tctx.fillStyle = `rgba(0,0,0,${state.tripping ? 0.028 : 0.018})`;
       tctx.fillRect(0, 0, W, H);
     }
 
-    const pulseCap = state.tripping ? 36 : 18;
-    if (paths.length && pulses.length < pulseCap && frame % (state.tripping ? 4 : 8) === 0) {
+    const pulseCap = state.tripping ? 48 : 28;
+    if (paths.length && pulses.length < pulseCap && frame % (state.tripping ? 3 : 5) === 0) {
       const p = pick(paths);
       pulses.push({
         p,
@@ -1526,18 +1530,20 @@ const Net = (() => {
         dir: Math.random() < 0.5 ? 1 : -1,
         v: rand(0.22, 0.5),
         hue: pickHue(),
-        s: rand(10, 18),
+        s: rand(12, 22),
       });
       state.pulsesTotal++;
     }
 
-    if (frame % 3 === 0) seed();
+    if (frame % 2 === 0) seed();
   }
 
   function render() {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalCompositeOperation = "source-over";
-    ctx.clearRect(0, 0, W, H);
-    ctx.drawImage(trail, 0, 0, W, H);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(trail, 0, 0);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.globalCompositeOperation = "lighter";
 
     for (let i = pulses.length - 1; i >= 0; i--) {
@@ -1615,8 +1621,11 @@ const Net = (() => {
         running = shouldRun;
       }
     });
-    for (let i = 0; i < 8; i++) spawn(rand(0, W), H + 5, rand(-2.2, -0.9));
-    for (let i = 0; i < 4; i++) spawn(W * 0.72, H * 0.55, rand(0, Math.PI * 2), 1, 352);
+    for (let i = 0; i < 14; i++) spawn(rand(0, W), H + 5, rand(-2.2, -0.9));
+    for (let i = 0; i < 8; i++) spawn(-5, rand(0, H), rand(-0.5, 0.5));
+    for (let i = 0; i < 8; i++) spawn(W + 5, rand(0, H), Math.PI + rand(-0.5, 0.5));
+    for (let i = 0; i < 10; i++) spawn(rand(W * 0.15, W * 0.85), rand(H * 0.2, H * 0.8), rand(0, Math.PI * 2), 1);
+    for (let i = 0; i < 6; i++) spawn(W * 0.72, H * 0.55, rand(0, Math.PI * 2), 1, 352);
     loop();
   }
 
